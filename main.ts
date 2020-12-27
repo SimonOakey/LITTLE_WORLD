@@ -4,6 +4,13 @@ namespace SpriteKind {
     export const FRIEND = SpriteKind.create()
     export const aBIT = SpriteKind.create()
 }
+/**
+ * -------------------------------------
+ * 
+ * ---------- UPDATE ------------------
+ * 
+ * ----------------------------------
+ */
 controller.up.onEvent(ControllerButtonEvent.Pressed, function () {
     animation.stopAnimation(animation.AnimationTypes.All, myplayer)
     animation.runImageAnimation(
@@ -114,54 +121,6 @@ function basic_setup () {
         aBit.y = Math.random() * 200
     }
 }
-controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
-    aTree = sprites.create(img`
-        ........................
-        ...........ff...........
-        ..........f88f..........
-        .........ff88ff.........
-        .........f8888f.........
-        ........f888888f........
-        ......ff88888888ff......
-        .....f888888888888f.....
-        .....ff8888888888ff.....
-        .....f888888888888f.....
-        ....f88ff88888fff88f....
-        ....ffff88fff88f8fff....
-        .....f8f8ff8ff8f88f.....
-        ....f88fff88fffff8f.....
-        ....f8ffff8fffffffff....
-        ....fff88ffffff88fff....
-        ....f888ffff8fff888f....
-        ...f888ff8f88f8ff888f...
-        ..f8888888888f888888f...
-        .f88f8888888888888888f..
-        .fff8888888888888888f8f.
-        .ff888888888888888888ff.
-        ..ff88f888f88f8888f888f.
-        ..f8ff88fff88ff8f88ff88f
-        .f88ff8ff8f8f88fff8fffff
-        f88ff8ff88ffff88ffff8f..
-        ffff88f88ffffff8f8ff88f.
-        .ffffffffffffffff88ff8f.
-        .ff888ff88ff8ff8ff8f8ff.
-        .f888ff888ff88f8888888ff
-        f888888888f888888888888f
-        fff888f8888888888f888ff.
-        ..ffff88f888888888ffff..
-        .....f8ff88f888ff8f.....
-        ......fff8fff88ffff.....
-        .........ffeeff.........
-        .........feeeef.........
-        .........feeeef.........
-        ........feeefeef........
-        ........fefeffef........
-        `, SpriteKind.aTREE)
-    aTree.setPosition(myplayer.x, myplayer.y - 18)
-    treelist.push(aTree)
-    music.playTone(147, music.beat(BeatFraction.Half))
-    myplayer.startEffect(effects.bubbles, 200)
-})
 controller.left.onEvent(ControllerButtonEvent.Pressed, function () {
     animation.stopAnimation(animation.AnimationTypes.All, myplayer)
     animation.runImageAnimation(
@@ -239,6 +198,25 @@ controller.left.onEvent(ControllerButtonEvent.Pressed, function () {
     true
     )
 })
+function changeLevel () {
+    if (current_level == 0) {
+        tiles.setTilemap(tilemap`level`)
+        tiles.placeOnRandomTile(myplayer, sprites.castle.tilePath5)
+        tiles.placeOnRandomTile(myfriend, sprites.castle.tilePath5)
+        myplayer.say("Bin Draussen", 1000)
+    } else if (current_level == 1) {
+        tiles.setTilemap(tilemap`level_0`)
+        tiles.placeOnRandomTile(myplayer, sprites.dungeon.floorDark5)
+        tiles.placeOnRandomTile(myfriend, sprites.dungeon.floorDark5)
+        myplayer.say("In der Kammer.", 1000)
+    } else {
+        tiles.setTilemap(tilemap`level_1`)
+        tiles.placeOnRandomTile(myplayer, sprites.dungeon.floorLight0)
+        tiles.placeOnRandomTile(myfriend, sprites.dungeon.floorLight0)
+        myplayer.say("Bin im Flur.", 1000)
+    }
+    music.playMelody("G F B C5 - - - - ", 400)
+}
 controller.right.onEvent(ControllerButtonEvent.Pressed, function () {
     animation.stopAnimation(animation.AnimationTypes.All, myplayer)
     animation.runImageAnimation(
@@ -397,15 +375,17 @@ controller.B.onEvent(ControllerButtonEvent.Released, function () {
     if (mpc.overlapsWith(myplayer)) {
         game.showLongText(quest_1_text, DialogLayout.Bottom)
     } else if (myfriend.overlapsWith(myplayer)) {
-    	
+        scene.cameraShake(4, 500)
+        current_level = Math.round(Math.random() * 3)
+        // color.RotatePalette.startScreenEffect(500)
+        changeLevel()
     } else {
         myplayer.say("Ich muss meine Freundin finden.", 1000)
     }
 })
 let nt: Sprite = null
 let is_moving = false
-let treelist: Sprite[] = []
-let aTree: Sprite = null
+let current_level = 0
 let aBit: Sprite = null
 let quest_1_text = ""
 let myfriend: Sprite = null
@@ -491,10 +471,6 @@ myfriend = sprites.create(img`
     `, SpriteKind.FRIEND)
 myfriend.setPosition(89, 89)
 myfriend.follow(myplayer, 10)
-basic_setup()
-// -------------------------------------
-// ---------- UPDATE ------------------
-// ----------------------------------
 game.onUpdate(function () {
     is_moving = controller.down.isPressed() || controller.up.isPressed() || controller.right.isPressed() || controller.left.isPressed()
     if (!(is_moving)) {
@@ -506,6 +482,7 @@ game.onUpdate(function () {
     }
 })
 game.onUpdateInterval(5000, function () {
+    let treelist: Sprite[] = []
     // console.log(nt.x)
     // console.log(nt.y)
     if (treelist.length > 0) {

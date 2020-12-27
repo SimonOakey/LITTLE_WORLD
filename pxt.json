@@ -1,5 +1,5 @@
 {
-    "name": "topdown_animation",
+    "name": "LITTLE WORLD PROTO_1",
     "description": "",
     "dependencies": {
         "device": "*",
@@ -25,5 +25,5 @@
     "supportedTargets": [
         "arcade"
     ],
-    "preferredEditor": "tsprj"
+    "preferredEditor": "blocksprj"
 }
